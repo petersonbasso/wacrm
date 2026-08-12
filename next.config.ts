@@ -64,10 +64,9 @@ const SECURITY_HEADERS = [
 ] as const;
 
 const nextConfig: NextConfig = {
-  // Emit a self-contained server bundle (.next/standalone) so the
-  // Docker image can run without node_modules or the Next CLI.
-  // Harmless outside Docker: `next start` keeps working as before.
-  output: "standalone",
+  // Emit a self-contained server bundle (.next/standalone) for Docker.
+  // Disabled on Vercel where standalone output conflicts with Vercel's NFT tracing.
+  output: process.env.VERCEL ? undefined : "standalone",
 
   /**
    * Cross-origin dev access (Next.js 16).
