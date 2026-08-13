@@ -1709,7 +1709,13 @@
       "saveSuccess": "AI assistant saved.",
       "saveFailed": "Failed to save.",
       "removeSuccess": "AI configuration removed.",
-      "removeFailed": "Failed to remove."
+      "removeFailed": "Failed to remove.",
+      "searchModels": "Search model...",
+      "liveBadge": "Live API models",
+      "defaultBadge": "Default models list",
+      "customModelOption": "Use custom model",
+      "fetchModelsSuccess": "Available models loaded from provider.",
+      "fetchModelsFailed": "Could not load models list from provider."
     },
     "aiKnowledge": {
       "loadFailed": "Failed to load knowledge base",

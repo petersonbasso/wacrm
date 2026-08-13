@@ -16,6 +16,39 @@ export const AI_PROVIDER_DEFAULT_MODEL: Record<AiProvider, string> = {
   deepseek: 'deepseek-chat',
 }
 
+export interface ProviderModelOption {
+  id: string
+  name?: string
+}
+
+/**
+  * Static curated list of fallback models per provider. Used as a fallback when
+  * the provider API is unreachable or no API key has been entered yet.
+  */
+export const AI_PROVIDER_STATIC_MODELS: Record<AiProvider, ProviderModelOption[]> = {
+  openai: [
+    { id: 'gpt-5.4-mini', name: 'GPT-5.4 Mini' },
+    { id: 'gpt-4o', name: 'GPT-4o' },
+    { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
+    { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
+    { id: 'o1', name: 'o1' },
+    { id: 'o1-mini', name: 'o1 Mini' },
+    { id: 'o3-mini', name: 'o3 Mini' },
+  ],
+  anthropic: [
+    { id: 'claude-haiku-4-5-20251001', name: 'Claude Haiku 4.5' },
+    { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet' },
+    { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet' },
+    { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku' },
+    { id: 'claude-3-opus-20240229', name: 'Claude 3 Opus' },
+  ],
+  deepseek: [
+    { id: 'deepseek-chat', name: 'DeepSeek V3 (chat)' },
+    { id: 'deepseek-reasoner', name: 'DeepSeek R1 (reasoner)' },
+  ],
+}
+
+
 /**
  * Sentinel the model is instructed to emit (in auto-reply mode) when it
  * can't confidently help and a human should take over. Parsed and

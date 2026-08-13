@@ -26,7 +26,12 @@ import {
 } from '@/components/ui/select';
 import { SettingsPanelHead } from './settings-panel-head';
 import { AiKnowledgeCard } from './ai-knowledge';
-import { AI_PROVIDER_DEFAULT_MODEL } from '@/lib/ai/defaults';
+import { ModelCombobox } from './model-combobox';
+import {
+  AI_PROVIDER_DEFAULT_MODEL,
+  AI_PROVIDER_STATIC_MODELS,
+  type ProviderModelOption,
+} from '@/lib/ai/defaults';
 import type { AiProvider } from '@/lib/ai/types';
 import type { AccountMember } from '@/types';
 import { fetchAccountMembers, memberLabel } from '@/lib/account/members';
@@ -63,6 +68,12 @@ export function AiConfig() {
   const [configured, setConfigured] = useState(false);
   const [provider, setProvider] = useState<AiProvider>('openai');
   const [model, setModel] = useState(AI_PROVIDER_DEFAULT_MODEL.openai);
+  const [availableModels, setAvailableModels] = useState<ProviderModelOption[]>(
+    AI_PROVIDER_STATIC_MODELS.openai,
+  );
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [fetchedLive, setFetchedLive] = useState(false);
+
   const [apiKey, setApiKey] = useState('');
   const [keyEdited, setKeyEdited] = useState(false);
   const [showKey, setShowKey] = useState(false);
@@ -83,6 +94,36 @@ export function AiConfig() {
   // refetches instead of showing the previous account's config. Mirrors
   // the loadedAccountIdRef pattern in whatsapp-config.tsx.
   const loadedAccountIdRef = useRef<string | null>(null);
+
+  const fetchModels = useCallback(
+    async (targetProvider: AiProvider, candidateKey?: string) => {
+      setLoadingModels(true);
+      try {
+        const res = await fetch('/api/ai/models', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            provider: targetProvider,
+            api_key: candidateKey,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.models) && data.models.length > 0) {
+          setAvailableModels(data.models);
+          setFetchedLive(Boolean(data.fetched));
+        } else {
+          setAvailableModels(AI_PROVIDER_STATIC_MODELS[targetProvider]);
+          setFetchedLive(false);
+        }
+      } catch {
+        setAvailableModels(AI_PROVIDER_STATIC_MODELS[targetProvider]);
+        setFetchedLive(false);
+      } finally {
+        setLoadingModels(false);
+      }
+    },
+    [],
+  );
 
   const fetchConfig = useCallback(async () => {
     setLoading(true);
@@ -108,13 +149,16 @@ export function AiConfig() {
         setHasStoredEmbeddingsKey(Boolean(data.has_embeddings_key));
         setEmbeddingsKey(data.has_embeddings_key ? MASKED_KEY : '');
         setEmbeddingsKeyEdited(false);
+        void fetchModels(data.provider);
+      } else {
+        void fetchModels('openai');
       }
     } catch {
       toast.error(t('loadFailed'));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchModels, t]);
 
   useEffect(() => {
     if (!accountId || loadedAccountIdRef.current === accountId) return;
@@ -136,6 +180,7 @@ export function AiConfig() {
       model === AI_PROVIDER_DEFAULT_MODEL.deepseek ||
       model.trim() === '';
     if (isDefaultModel) setModel(AI_PROVIDER_DEFAULT_MODEL[next]);
+    void fetchModels(next, keyEdited ? apiKey.trim() : undefined);
   };
 
   const keyPayload = () => (keyEdited ? apiKey.trim() : undefined);
@@ -293,12 +338,20 @@ export function AiConfig() {
 
               <div className="space-y-2">
                 <Label htmlFor="ai-model">{t('model')}</Label>
-                <Input
-                  id="ai-model"
+                <ModelCombobox
                   value={model}
-                  onChange={(e) => setModel(e.target.value)}
-                  placeholder={AI_PROVIDER_DEFAULT_MODEL[provider]}
+                  onChange={setModel}
+                  provider={provider}
+                  models={availableModels}
+                  loadingModels={loadingModels}
+                  fetchedLive={fetchedLive}
+                  onRefreshModels={() => void fetchModels(provider, keyPayload())}
                   disabled={disabled}
+                  placeholder={AI_PROVIDER_DEFAULT_MODEL[provider]}
+                  tSearchPlaceholder={t('searchModels')}
+                  tLiveBadge={t('liveBadge')}
+                  tDefaultBadge={t('defaultBadge')}
+                  tCustomModelOption={t('customModelOption')}
                 />
               </div>
             </div>
