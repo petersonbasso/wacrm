@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: 'WACRM',
     description: 'WhatsApp CRM & AI Assistant',
     start_url: '/',
+    scope: '/',
     display: 'standalone',
     background_color: '#020617',
     theme_color: '#020617',
@@ -13,17 +14,17 @@ export default function manifest(): MetadataRoute.Manifest {
     icons: [
       {
         src: '/icon',
-        sizes: 'any',
+        sizes: '32x32',
         type: 'image/png',
       },
       {
-        src: '/icon',
+        src: '/icon-192',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'maskable',
       },
       {
-        src: '/icon',
+        src: '/icon-512',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any',
