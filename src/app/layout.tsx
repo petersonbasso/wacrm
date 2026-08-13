@@ -26,6 +26,12 @@ export const metadata: Metadata = {
     template: "%s — wacrm",
   },
   description: "Self-hostable CRM template for WhatsApp.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "WACRM",
+  },
   robots: {
     index: false,
     follow: false,
@@ -43,6 +49,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#020617",
   colorScheme: "dark light",
+  viewportFit: "cover",
 };
 
 // Inline boot script — runs before React hydrates so the user's
