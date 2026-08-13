@@ -1,5 +1,5 @@
 -- ============================================================
--- 037_deepseek_provider.sql — Add DeepSeek to AI provider options
+-- 040_deepseek_provider.sql — Add DeepSeek to AI provider options
 --
 -- Updates the check constraints on ai_configs and ai_usage_log to allow
 -- 'deepseek' as a valid AI provider alongside 'openai' and 'anthropic'.
