@@ -192,3 +192,52 @@ describe('generateReply — Anthropic', () => {
     expect(body.messages).toHaveLength(1)
   })
 })
+
+describe('generateReply — DeepSeek', () => {
+  it('calls DeepSeek chat completions endpoint with Bearer auth and max_tokens', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      okResponse({
+        choices: [{ message: { content: 'Olá do DeepSeek!' } }],
+        usage: { prompt_tokens: 15, completion_tokens: 5, total_tokens: 20 },
+      }),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+
+    const res = await generateReply({
+      config: config({ provider: 'deepseek', apiKey: 'sk-deepseek-key', model: 'deepseek-chat' }),
+      systemPrompt: 'sys',
+      messages: [{ role: 'user', content: 'Oi' }],
+    })
+
+    expect(res).toEqual({
+      text: 'Olá do DeepSeek!',
+      handoff: false,
+      usage: { promptTokens: 15, completionTokens: 5, totalTokens: 20 },
+    })
+    const [url, opts] = fetchMock.mock.calls[0]
+    expect(url).toBe('https://api.deepseek.com/chat/completions')
+    expect(opts.headers.Authorization).toBe('Bearer sk-deepseek-key')
+    const body = JSON.parse(opts.body)
+    expect(body.model).toBe('deepseek-chat')
+    expect(body.max_tokens).toBe(1024)
+  })
+
+  it('detects handoff in DeepSeek output', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        okResponse({
+          choices: [{ message: { content: 'Preciso passar para um humano [[HANDOFF]]' } }],
+        }),
+      ),
+    )
+    const res = await generateReply({
+      config: config({ provider: 'deepseek' }),
+      systemPrompt: 'sys',
+      messages: [{ role: 'user', content: 'Quero reembolso' }],
+    })
+    expect(res.handoff).toBe(true)
+    expect(res.text).toBe('Preciso passar para um humano')
+  })
+})
+
